@@ -1,5 +1,5 @@
 import RealityKit
-import Foundation
+import UIKit
 
 class GhostEntity {
     let entity: ModelEntity
@@ -11,15 +11,15 @@ class GhostEntity {
         if let modelURL = Bundle.main.url(forResource: "ghost", withExtension: "usdz") {
             entity = try ModelEntity.loadModel(contentsOf: modelURL)
         } else {
-            // Fallback: create a simple ghost shape procedurally
-            let bodyMesh = MeshResource.generateCone(height: 0.4, radius: 0.15)
+            // Fallback: create a simple ghost shape procedurally (sphere)
+            let bodyMesh = MeshResource.generateSphere(radius: 0.2)
             entity = ModelEntity(mesh: bodyMesh)
         }
 
         // Apply semi-transparent ghost material
         var material = SimpleMaterial()
         material.color = .init(
-            tint: UIColor(red: 0.7, green: 0.85, blue: 1.0, alpha: 0.6)
+            tint: UIColor(red: 0.75, green: 0.88, blue: 1.0, alpha: 0.8)
         )
         material.metallic = .float(0.0)
         material.roughness = .float(0.8)
