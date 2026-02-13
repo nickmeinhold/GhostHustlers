@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Xcode
+ios/GhostHustlers/build/
+ios/GhostHustlers/*.xcworkspace
+ios/GhostHustlers/xcuserdata/
+ios/GhostHustlers/*.xcodeproj/xcuserdata/
+ios/GhostHustlers/*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+ios/GhostHustlers/DerivedData/
+
+# Android
+android/GhostHustlers/.gradle/
+android/GhostHustlers/build/
+android/GhostHustlers/app/build/
+android/GhostHustlers/local.properties
+android/GhostHustlers/.idea/
+android/GhostHustlers/*.iml
+android/GhostHustlers/app/*.iml
+android/GhostHustlers/captures/
+
+# Models - keep GLB/USDZ but ignore Blender temp files
+*.blend1
