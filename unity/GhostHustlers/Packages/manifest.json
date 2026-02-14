@@ -1,18 +1,19 @@
 {
   "dependencies": {
-    "com.unity.xr.arfoundation": "6.0.4",
-    "com.unity.xr.arcore": "6.0.4",
-    "com.unity.xr.arkit": "6.0.4",
-    "com.unity.xr.interaction.toolkit": "3.0.7",
-    "com.unity.render-pipelines.universal": "17.0.3",
-    "com.unity.inputsystem": "1.11.2",
-    "com.unity.textmeshpro": "3.2.0-pre.12",
+    "com.unity.inputsystem": "1.18.0",
+    "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.ugui": "2.0.0",
+    "com.unity.xr.arcore": "6.3.2",
+    "com.unity.xr.arfoundation": "6.3.2",
+    "com.unity.xr.arkit": "6.3.2",
+    "com.unity.xr.interaction.toolkit": "3.3.1",
+    "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.ui": "1.0.0",
-    "com.unity.modules.unitywebrequest": "1.0.0"
+    "com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.modules.vectorgraphics": "1.0.0"
   }
 }

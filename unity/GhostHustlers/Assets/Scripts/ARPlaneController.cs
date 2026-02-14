@@ -29,16 +29,16 @@ public class ARPlaneController : MonoBehaviour
     void OnEnable()
     {
         if (planeManager != null)
-            planeManager.planesChanged += OnPlanesChanged;
+            planeManager.trackablesChanged.AddListener(OnTrackablesChanged);
     }
 
     void OnDisable()
     {
         if (planeManager != null)
-            planeManager.planesChanged -= OnPlanesChanged;
+            planeManager.trackablesChanged.RemoveListener(OnTrackablesChanged);
     }
 
-    void OnPlanesChanged(ARPlanesChangedEventArgs args)
+    void OnTrackablesChanged(ARTrackablesChangedEventArgs<ARPlane> args)
     {
         if (hasNotifiedPlane) return;
 
@@ -85,7 +85,7 @@ public class ARPlaneController : MonoBehaviour
         pose = Pose.identity;
         if (raycastManager == null) return false;
 
-        if (raycastManager.Raycast(screenPoint, raycastHits, TrackableTypes.PlaneWithinPolygon))
+        if (raycastManager.Raycast(screenPoint, raycastHits, TrackableType.PlaneWithinPolygon))
         {
             pose = raycastHits[0].pose;
             return true;

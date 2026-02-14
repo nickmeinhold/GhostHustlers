@@ -15,7 +15,6 @@ public class SceneSetup
         // -- AR Session --
         GameObject arSession = new GameObject("AR Session");
         arSession.AddComponent<ARSession>();
-        arSession.AddComponent<ARInputManager>();
 
         // -- XR Origin (AR Session Origin) --
         GameObject xrOrigin = new GameObject("XR Origin");
