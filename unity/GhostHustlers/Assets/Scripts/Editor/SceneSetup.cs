@@ -115,4 +115,26 @@ public class SceneSetup
 
         Debug.Log("Ghost prefab created at " + prefabPath);
     }
+
+    /// <summary>
+    /// Batch-mode entry point: sets up scene, creates prefab, saves scene.
+    /// </summary>
+    public static void BatchSetup()
+    {
+        // Create a new empty scene
+        var scene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
+            UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
+            UnityEditor.SceneManagement.NewSceneMode.Single);
+
+        SetupARScene();
+        CreateGhostPrefab();
+
+        // Save scene
+        string scenePath = "Assets/Scenes/GhostHustlers.unity";
+        if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
+            AssetDatabase.CreateFolder("Assets", "Scenes");
+
+        UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, scenePath);
+        Debug.Log("Scene saved to " + scenePath);
+    }
 }
