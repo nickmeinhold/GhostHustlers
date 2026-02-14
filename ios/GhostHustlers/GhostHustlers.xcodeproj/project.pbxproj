@@ -12,6 +12,7 @@
 		A10003 /* ARViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20003 /* ARViewContainer.swift */; };
 		A10004 /* GhostEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20004 /* GhostEntity.swift */; };
 		A10005 /* ghost.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A20005 /* ghost.usdz */; };
+		A10006 /* BeamEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20006 /* BeamEntity.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		A20003 /* ARViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewContainer.swift; sourceTree = "<group>"; };
 		A20004 /* GhostEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhostEntity.swift; sourceTree = "<group>"; };
 		A20005 /* ghost.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = ghost.usdz; sourceTree = "<group>"; };
+		A20006 /* BeamEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamEntity.swift; sourceTree = "<group>"; };
 		A30001 /* GhostHustlers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GhostHustlers.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -58,6 +60,7 @@
 			children = (
 				A20003 /* ARViewContainer.swift */,
 				A20004 /* GhostEntity.swift */,
+				A20006 /* BeamEntity.swift */,
 			);
 			path = AR;
 			sourceTree = "<group>";
@@ -143,6 +146,7 @@
 				A10002 /* ContentView.swift in Sources */,
 				A10003 /* ARViewContainer.swift in Sources */,
 				A10004 /* GhostEntity.swift in Sources */,
+				A10006 /* BeamEntity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,7 +174,7 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -195,7 +199,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
