@@ -19,12 +19,9 @@ ghost_hustlers/
 │   ├── Assets/Prefabs/        # Ghost prefab (created in editor)
 │   ├── Assets/Scenes/         # AR scene (created in editor)
 │   └── UNITY_SETUP.md         # Step-by-step editor setup guide
-├── models/                    # Canonical 3D source assets
-│   ├── ghost.glb              # Universal GLB format
-│   └── ghost.usdz             # Apple USDZ format
-└── legacy/                    # Original native implementations (reference only)
-    ├── ios/                   # Swift + ARKit/RealityKit
-    └── android/               # Kotlin + ARCore + SceneView
+└── models/                    # Canonical 3D source assets
+    ├── ghost.glb              # Universal GLB format
+    └── ghost.usdz             # Apple USDZ format
 ```
 
 ## Quick Start
@@ -73,10 +70,3 @@ These are minimal cone shapes (~40cm tall). Replace with higher-fidelity models 
 ### Hit Detection
 Beam hits if `aimAngle < atan2(ghostRadius, distance) && distance < 10m`, matching the original iOS implementation. The ghost radius is 0.25m, providing a forgiving but not trivial target.
 
-## Legacy
-
-The original native implementations are preserved in `legacy/` for reference:
-- `legacy/ios/` — Swift/RealityKit (678 lines, full gameplay)
-- `legacy/android/` — Kotlin/SceneView (234 lines, MVP only)
-
-These are not maintained. All development happens in the Unity project.

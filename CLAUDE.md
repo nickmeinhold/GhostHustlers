@@ -17,8 +17,6 @@ Originally built as two separate native codebases (iOS: Swift/RealityKit, Androi
 ## Project structure
 
 - `unity/GhostHustlers/` — Unity 6 project (C#, AR Foundation, URP)
-- `legacy/ios/` — Original iOS implementation (Swift/RealityKit) — reference only
-- `legacy/android/` — Original Android implementation (Kotlin/SceneView) — reference only
 - `models/` — Shared source assets (ghost.glb)
 
 ## Unity project
