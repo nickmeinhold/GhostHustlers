@@ -33,11 +33,70 @@ Originally built as two separate native codebases (iOS: Swift/RealityKit, Androi
 - `Assets/Scripts/ProtonBeam.cs` — Beam rendering, positioning, pulse animation
 - `Assets/Scripts/UIManager.cs` — HUD overlay (status, crosshair, respawn)
 - `Assets/Scripts/ARPlaneController.cs` — Plane detection, ghost placement
+- `Assets/Scripts/Editor/ProjectConfigurator.cs` — Idempotent project setup (URP, XR, player settings, scripting defines)
+- `Assets/Scripts/Editor/BuildScript.cs` — CLI build entry points with ARKit batch mode workarounds
+- `Assets/Scripts/Editor/iOSPostBuildProcessor.cs` — Xcode project post-processing (Swift support)
 
-### Build
-- Open `unity/GhostHustlers/` in Unity 6
-- Switch platform to iOS or Android in Build Settings
-- Build and run on physical device (AR requires camera)
+### Build (CLI — batch mode)
+```bash
+# Step 1: Configure project (sets scripting defines, must run before first build)
+Unity -batchmode -projectPath unity/GhostHustlers -buildTarget iOS \
+  -executeMethod ProjectConfigurator.ConfigureProject -quit
+
+# Step 2: Build iOS
+Unity -batchmode -projectPath unity/GhostHustlers -buildTarget iOS \
+  -executeMethod BuildScript.BuildiOS -quit
+
+# Step 3: Xcode archive + deploy
+xcodebuild -project Builds/iOS/Unity-iPhone.xcodeproj -scheme Unity-iPhone \
+  -destination 'generic/platform=iOS' -configuration Release \
+  DEVELOPMENT_TEAM=SPL85G447K archive -archivePath /tmp/GhostHustlers.xcarchive
+xcrun devicectl device install app --device <DEVICE_ID> \
+  /tmp/GhostHustlers.xcarchive/Products/Applications/GhostHustlers.app
+```
+
+Step 1 only needs to run once (or after a clean checkout). It persists
+`UNITY_XR_ARKIT_LOADER_ENABLED` to ProjectSettings.asset so subsequent builds
+compile ARKit C# with real DllImport calls.
+
+### ARKit batch mode build bug
+
+`ARKitBuildProcessor.LoaderEnabledCheck` (in the ARKit XR Plugin package) has
+`if (Application.isBatchMode) return;` in its static constructor, which skips
+`UpdateARKitDefines()`. This causes three cascading failures when building from
+the command line:
+
+1. **`loaderEnabled` stays false** — `ShouldIncludeRuntimePluginsInBuild()` returns
+   false for all native plugins, so `libUnityARKit.a` is excluded from the build.
+   Fix: `BuildScript.ForceARKitLoaderEnabled()` uses reflection to set the field.
+
+2. **`UNITY_XR_ARKIT_LOADER_ENABLED` define never added** — All ARKit C# compiles
+   with stub implementations (`AtLeast11_0() => false`, no `DllImport` calls).
+   `RegisterDescriptor()` exits early, no subsystem descriptors are registered,
+   and `ARKitLoader.Initialize()` fails with "Failed to load session subsystem."
+   Fix: `ProjectConfigurator.ConfigureScriptingDefines()` adds the define to
+   PlayerSettings before scripts compile. `BuildScript.EnsureARKitScriptingDefine()`
+   also adds it as a belt-and-suspenders measure.
+
+3. **Swift linker failure** — `libUnityARKit.a` contains Swift code
+   (`RoomCaptureSessionWrapper.o`) that references `swiftCompatibility*` symbols.
+   Without `SWIFT_VERSION` set and a `.swift` source file in the target, Xcode
+   won't invoke `swiftc` and the Swift runtime won't be linked.
+   Fix: `iOSPostBuildProcessor` adds a dummy `SwiftBridge.swift` file to the
+   UnityFramework target and sets `SWIFT_VERSION=5.0`.
+
+### AR-safe player settings
+
+These settings are required/recommended for AR Foundation on iOS (applied by
+`ProjectConfigurator`):
+
+- **Color space: Linear** — required by URP
+- **Multithreaded rendering: OFF** (iOS + Android) — causes black screen with AR Foundation
+- **ARBackgroundRendererFeature** in URP renderer — required for camera feed render pass
+- **Depth/Opaque texture: OFF** — known iOS AR black screen cause
+- **MSAA: 1 (disabled)** — not needed for AR, saves GPU
+- **Render scale: 1.0** — must match device resolution for AR
+- **URP pipeline assigned to all quality levels** — prevents quality level mismatch
 
 ## Gameplay design
 
