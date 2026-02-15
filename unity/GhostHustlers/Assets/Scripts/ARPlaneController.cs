@@ -11,7 +11,7 @@ using System.Collections.Generic;
 public class ARPlaneController : MonoBehaviour
 {
     [Header("Placement Settings")]
-    public float minPlaneExtent = 0.3f;
+    public float minPlaneExtent = 0.1f;
 
     [Header("AR References")]
     public ARPlaneManager planeManager;

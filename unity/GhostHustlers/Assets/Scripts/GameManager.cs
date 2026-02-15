@@ -181,12 +181,7 @@ public class GameManager : MonoBehaviour
 
                 case TouchPhase.Ended:
                 case TouchPhase.Canceled:
-                    float touchDuration = Time.time - touchBeganTime;
                     StopBeam();
-
-                    // Short tap (<0.2s) for manual placement
-                    if (touchDuration < 0.2f && CurrentState == GameState.Scanning)
-                        HandleTapPlacement(touch.position);
                     break;
             }
         }
@@ -201,14 +196,6 @@ public class GameManager : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             StopBeam();
-        }
-    }
-
-    void HandleTapPlacement(Vector2 screenPos)
-    {
-        if (planeController != null && planeController.TryGetPlacementPose(screenPos, out Pose pose))
-        {
-            PlaceGhost(pose.position, pose.rotation);
         }
     }
 
@@ -316,11 +303,6 @@ public class GameManager : MonoBehaviour
         planeController?.ShowPlaneVisuals();
 
         SetState(GameState.Scanning);
-
-        // Try to place immediately on an already-tracked plane
-        if (planeController != null && planeController.TryGetAnyTrackedPlanePose(out Pose pose))
-        {
-            PlaceGhost(pose.position, pose.rotation);
-        }
+        // Ghost will auto-place when plane detection fires OnSuitablePlaneFound
     }
 }
