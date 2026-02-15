@@ -42,13 +42,19 @@ public class ARPlaneController : MonoBehaviour
     {
         if (hasNotifiedPlane) return;
 
+        Debug.Log("[ARPlane] Trackables changed: added=" + args.added.Count +
+            " updated=" + args.updated.Count);
+
         // Check newly added planes
         foreach (var plane in args.added)
         {
+            Debug.Log("[ARPlane] New plane: alignment=" + plane.alignment +
+                " extents=" + plane.extents + " center=" + plane.center);
             if (IsSuitablePlane(plane))
             {
                 hasNotifiedPlane = true;
                 Pose pose = new Pose(plane.center, plane.transform.rotation);
+                Debug.Log("[ARPlane] Suitable plane found, invoking callback");
                 OnSuitablePlaneFound?.Invoke(pose);
                 return;
             }

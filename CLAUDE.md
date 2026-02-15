@@ -25,7 +25,7 @@ Originally built as two separate native codebases (iOS: Swift/RealityKit, Androi
 - Unity 6 LTS, Universal Render Pipeline (URP)
 - AR Foundation 6.0 + ARCore XR Plugin + ARKit XR Plugin
 - ARCore Extensions (for Cloud Anchors)
-- Build targets: iOS 14+, Android API 24+
+- Build targets: iOS 14+, Android API 29+
 
 ### Key files
 - `Assets/Scripts/GameManager.cs` — Game flow, input, AR session management
@@ -55,9 +55,18 @@ xcrun devicectl device install app --device <DEVICE_ID> \
   /tmp/GhostHustlers.xcarchive/Products/Applications/GhostHustlers.app
 ```
 
-Step 1 only needs to run once (or after a clean checkout). It persists
-`UNITY_XR_ARKIT_LOADER_ENABLED` to ProjectSettings.asset so subsequent builds
-compile ARKit C# with real DllImport calls.
+```bash
+# Build Android
+Unity -batchmode -projectPath unity/GhostHustlers -buildTarget Android \
+  -executeMethod BuildScript.BuildAndroid -quit
+
+# Deploy to connected device
+adb install -r unity/GhostHustlers/Builds/GhostHustlers.apk
+```
+
+Step 1 (iOS configure) only needs to run once (or after a clean checkout). It
+persists `UNITY_XR_ARKIT_LOADER_ENABLED` to ProjectSettings.asset so subsequent
+builds compile ARKit C# with real DllImport calls.
 
 ### ARKit batch mode build bug
 
@@ -85,9 +94,24 @@ the command line:
    Fix: `iOSPostBuildProcessor` adds a dummy `SwiftBridge.swift` file to the
    UnityFramework target and sets `SWIFT_VERSION=5.0`.
 
+### Android build settings
+
+`BuildScript.BuildAndroid()` configures:
+
+- **Graphics API: OpenGLES3** (not Vulkan) — Vulkan requires
+  `ARCommandBufferSupportRendererFeature` in the URP renderer for ARCore camera
+  background rendering. Without it, every frame throws
+  `InvalidOperationException: ARCommandBufferSupportRendererFeature must be added`.
+  OpenGLES3 works with just `ARBackgroundRendererFeature` and is what most
+  shipping AR games use (Pokemon GO, etc.).
+- **Min SDK: API 29** (Android 10) — required by ARCore when Vulkan is a
+  potential graphics API. Even with GLES3 forced, the ARCore plugin validates
+  this at build time.
+- **Target architecture: ARM64** — all modern Android AR devices.
+
 ### AR-safe player settings
 
-These settings are required/recommended for AR Foundation on iOS (applied by
+These settings are required/recommended for AR Foundation (applied by
 `ProjectConfigurator`):
 
 - **Color space: Linear** — required by URP
@@ -97,6 +121,26 @@ These settings are required/recommended for AR Foundation on iOS (applied by
 - **MSAA: 1 (disabled)** — not needed for AR, saves GPU
 - **Render scale: 1.0** — must match device resolution for AR
 - **URP pipeline assigned to all quality levels** — prevents quality level mismatch
+
+### Runtime material creation (Shader.Find pitfall)
+
+Ghost, ProtonBeam, and health bar materials are created at runtime via
+`Shader.Find("Universal Render Pipeline/Lit")`. This works but has caveats:
+
+- **Transparent variants get stripped**: If no Material asset in the project
+  explicitly uses URP/Lit in transparent mode, Unity's shader stripping removes
+  those variants from the build. Setting `_Surface=1` and enabling
+  `_SURFACE_TYPE_TRANSPARENT` at runtime has no effect if the compiled shader
+  doesn't include the transparent pass. Ghost currently uses **opaque** mode to
+  avoid this.
+- **Always check for null**: `Shader.Find` returns null if the shader was
+  stripped. Ghost.cs and ProtonBeam.cs include fallback chains
+  (URP/Lit → Simple Lit → Unlit → Sprites/Default).
+- **URP/Unlit is stripped** from the current build (no asset references it).
+  Only URP/Lit and Sprites/Default are confirmed available at runtime.
+- To restore transparency: create a Material asset in the editor with URP/Lit
+  set to transparent mode and assign it to the ghost prefab. This forces Unity
+  to include the transparent shader variants in the build.
 
 ## Gameplay design
 
@@ -109,7 +153,7 @@ These settings are required/recommended for AR Foundation on iOS (applied by
 ### Animation specs
 - Hover: sine wave Y offset, +-5cm amplitude, 1.5s period
 - Rotation: 360deg/8s around Y axis
-- Ghost material: semi-transparent blue (alpha 0.6)
+- Ghost material: opaque blue (RGBA: 0.3, 0.7, 1.0, 1.0) — was semi-transparent but transparent URP shader variants get stripped in device builds (see "Runtime material creation" section)
 - Beam material: yellow/gold (RGBA: 1.0, 0.85, 0.2, 0.7)
 - Health bar: green->yellow->red gradient, positioned Y+0.3m above ghost
 

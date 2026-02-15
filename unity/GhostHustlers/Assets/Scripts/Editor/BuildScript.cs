@@ -41,8 +41,14 @@ public class BuildScript
 
     public static void BuildAndroid()
     {
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
+        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+
+        // Force OpenGLES3 for AR — Vulkan requires ARCommandBufferSupportRendererFeature
+        // and has known issues with ARCore camera background rendering.
+        PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+        PlayerSettings.SetGraphicsAPIs(BuildTarget.Android,
+            new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
 
         var options = new BuildPlayerOptions
         {
