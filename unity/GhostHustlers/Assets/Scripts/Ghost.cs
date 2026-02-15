@@ -23,7 +23,7 @@ public class Ghost : MonoBehaviour
     public float shakeIntensity = 0.01f; // ±1cm jitter
 
     [Header("Ghost Material")]
-    public Color ghostColor = new Color(0.75f, 0.88f, 1f, 0.6f);
+    public Color ghostColor = new Color(0.3f, 0.7f, 1f, 1f);
 
     [Header("Health Bar")]
     public float healthBarWidth = 0.15f;
@@ -158,7 +158,6 @@ public class Ghost : MonoBehaviour
         if (!isAnimating || isCaptured) return;
 
         elapsed += Time.deltaTime;
-
 
         // Sine wave hover: ±5cm, 1.5s period
         float hoverY = hoverAmplitude * Mathf.Sin(elapsed * 2f * Mathf.PI / hoverPeriod);
