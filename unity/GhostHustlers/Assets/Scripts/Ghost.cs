@@ -71,7 +71,8 @@ public class Ghost : MonoBehaviour
             return;
         }
 
-        Shader shader = FindURPShader();
+        Shader shader = ShaderUtils.FindURPShader();
+        if (shader == null) { Debug.LogError("[Ghost] No shader available!"); return; }
         ghostMaterial = new Material(shader);
 
         // Opaque base color — visible against any background
@@ -86,19 +87,6 @@ public class Ghost : MonoBehaviour
         Debug.Log("[Ghost] Material setup complete, shader: " + shader.name +
             " color: " + ghostMaterial.GetColor("_BaseColor") +
             " renderQueue: " + ghostMaterial.renderQueue);
-    }
-
-    static Shader FindURPShader()
-    {
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-        if (shader != null) return shader;
-        Debug.LogWarning("[Ghost] URP/Lit shader not found, trying fallbacks");
-        shader = Shader.Find("Universal Render Pipeline/Simple Lit");
-        if (shader != null) return shader;
-        shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader != null) return shader;
-        Debug.LogError("[Ghost] No URP shader found! Falling back to built-in");
-        return Shader.Find("Sprites/Default");
     }
 
     static void ConfigureTransparentMaterial(Material mat, Color color, int renderQueue)
@@ -124,7 +112,11 @@ public class Ghost : MonoBehaviour
         healthBarBg.transform.localScale = new Vector3(healthBarWidth, healthBarHeight, healthBarDepth);
         Destroy(healthBarBg.GetComponent<Collider>());
 
-        Shader shader = FindURPShader();
+        // NOTE: Transparent shader variants may be stripped on device if no Material
+        // asset in the project references URP/Lit in transparent mode. Health bars will
+        // still render but as opaque. Acceptable for now — see CLAUDE.md "Runtime material creation".
+        Shader shader = ShaderUtils.FindURPShader();
+        if (shader == null) return;
         var bgMat = new Material(shader);
         ConfigureTransparentMaterial(bgMat, new Color(0.2f, 0.2f, 0.2f, 0.8f), 3001);
         healthBarBg.GetComponent<Renderer>().material = bgMat;
