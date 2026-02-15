@@ -182,8 +182,12 @@ build time via `PlayerSettings.SetApplicationIdentifier()`.
 - **Company name**: Still `DefaultCompany` in PlayerSettings (cosmetic, doesn't affect builds since bundle ID is set in BuildScript).
 
 ### Known issues
-- iOS bundle ID was previously `com.DefaultCompany.GhostHustlers` (old installs may conflict — uninstall first)
-- Android had an old `com.ghosthustlers.app` install (same — uninstall old version)
+- iOS bundle ID was previously `com.DefaultCompany.GhostHustlers` (old installs may conflict — delete from device manually)
+- Android had old installs under different bundle IDs — uninstall before deploying:
+  ```bash
+  adb uninstall com.ghosthustlers.app
+  adb uninstall com.DefaultCompany.GhostHustlers
+  ```
 
 ## Roadmap: iOS
 
