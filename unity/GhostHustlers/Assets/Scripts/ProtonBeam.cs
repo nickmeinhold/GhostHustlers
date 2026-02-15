@@ -35,13 +35,11 @@ public class ProtonBeam : MonoBehaviour
         meshRenderer = cylinder.GetComponent<MeshRenderer>();
 
         // Create URP transparent material
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+        Shader shader = ShaderUtils.FindURPShader();
         if (shader == null)
         {
-            Debug.LogWarning("[ProtonBeam] URP/Lit not found, trying fallbacks");
-            shader = Shader.Find("Universal Render Pipeline/Simple Lit");
-            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader == null) shader = Shader.Find("Sprites/Default");
+            Debug.LogError("[ProtonBeam] No shader available, beam will be invisible");
+            return;
         }
         Debug.Log("[ProtonBeam] Using shader: " + shader.name);
 
