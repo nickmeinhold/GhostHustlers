@@ -5,8 +5,12 @@ using System.Reflection;
 
 public class BuildScript
 {
+    const string BundleId = "co.enspyr.ghosthustlers";
+
     public static void BuildiOS()
     {
+        PlayerSettings.companyName = "Enspyr";
+        PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, BundleId);
         PlayerSettings.iOS.targetOSVersionString = "14.0";
         PlayerSettings.iOS.cameraUsageDescription = "Required for AR";
 
@@ -41,7 +45,10 @@ public class BuildScript
 
     public static void BuildAndroid()
     {
+        PlayerSettings.companyName = "Enspyr";
+        PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android, BundleId);
         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34; // Play Store requirement
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
 
         // Force OpenGLES3 for AR — Vulkan requires ARCommandBufferSupportRendererFeature

@@ -142,13 +142,19 @@ Ghost, ProtonBeam, and health bar materials are created at runtime via
   set to transparent mode and assign it to the ghost prefab. This forces Unity
   to include the transparent shader variants in the build.
 
+## Bundle ID
+
+`co.enspyr.ghosthustlers` — set by `BuildScript` for both iOS and Android at
+build time via `PlayerSettings.SetApplicationIdentifier()`.
+
 ## Gameplay design
 
-1. Ghost auto-places on first detected horizontal surface (extent > 0.3m)
+1. Ghost auto-places on first detected horizontal surface (extent > 0.1m)
 2. Hold screen to fire beam from camera toward screen center
 3. Beam hits ghost (angular check: angle < atan2(ghostRadius, distance) && distance < 10m): ghost shakes, health bar drains over ~4s
 4. Health reaches 0: ghost shrinks+fades over 0.5s, "Ghost captured!" shown
-5. "Spawn New Ghost" button resets and places a new ghost
+5. "Spawn New Ghost" button resets, waits for plane detection, places a new ghost
+6. No tap-to-place — ghost only appears via automatic plane detection
 
 ### Animation specs
 - Hover: sine wave Y offset, +-5cm amplitude, 1.5s period
@@ -157,10 +163,92 @@ Ghost, ProtonBeam, and health bar materials are created at runtime via
 - Beam material: yellow/gold (RGBA: 1.0, 0.85, 0.2, 0.7)
 - Health bar: green->yellow->red gradient, positioned Y+0.3m above ghost
 
-## Future (multiplayer)
+## Current status (Feb 2026)
 
-- Cloud Anchors via ARCore Extensions for AR Foundation (cross-platform spatial alignment)
-- Real-time state sync via Photon Fusion or Unity Netcode for GameObjects
-- Niantic Lightship VPS as alternative/complement for location-based colocalization
-- Game logic: who's damaging which ghost, scores, player positions
-- Lobby/matchmaking/discovery
+### What's working
+- Complete single-player gameplay loop on both platforms (scan → place → fire → capture → respawn)
+- AR plane detection and ghost auto-placement (iOS ARKit + Android ARCore)
+- Proton beam with pulse animation and angular hit detection
+- Ghost hover/rotation animation, damage shake, health bar, capture shrink+fade
+- Procedural UI (status text, crosshair, hint text, respawn button)
+- CLI build pipeline for both platforms (batch mode, no editor required)
+- Shader fallback chain with null guards (`ShaderUtils.FindURPShader()`)
+
+### What's placeholder
+- **Ghost model**: Low-poly cone shape (`models/ghost.glb`, ~40cm tall). Needs a proper ghost mesh (<10k triangles) from Blender/Sketchfab.
+- **No Material assets**: All materials created at runtime via `Shader.Find`. Transparent URP shader variants are stripped — ghost is opaque, health bar transparency may silently fail. Fix: create Material assets in the editor to force variant inclusion.
+- **No audio**: No sound effects or music.
+- **No particles**: No beam impact particles, ghost spawn/capture VFX.
+- **Company name**: Still `DefaultCompany` in PlayerSettings (cosmetic, doesn't affect builds since bundle ID is set in BuildScript).
+
+### Known issues
+- iOS bundle ID was previously `com.DefaultCompany.GhostHustlers` (old installs may conflict — delete from device manually)
+- Android had old installs under different bundle IDs — uninstall before deploying:
+  ```bash
+  adb uninstall com.ghosthustlers.app
+  adb uninstall com.DefaultCompany.GhostHustlers
+  ```
+
+## Roadmap: iOS
+
+### Phase 1 — Polish (current)
+- [x] AR plane detection and ghost placement
+- [x] Beam firing with hit detection
+- [x] Health system and capture animation
+- [x] CLI build with ARKit batch mode workarounds
+- [x] Xcode archive and device deployment
+- [ ] Replace placeholder ghost model with proper 3D asset
+- [ ] Add transparent Material assets in editor to restore ghost/beam/health bar transparency
+- [ ] Add sound effects (beam fire, ghost hit, capture)
+- [ ] Add particle effects (beam impact sparks, ghost capture burst)
+- [ ] Haptic feedback on beam hit (iOS taptic engine)
+
+### Phase 2 — Game feel
+- [ ] Score counter and capture streak
+- [ ] Ghost difficulty variants (faster movement, smaller hit radius, more health)
+- [ ] Screen shake on capture
+- [ ] Ghost spawn animation (fade in / materialize)
+- [ ] Tutorial overlay for first-time players
+
+### Phase 3 — Multiplayer
+- [ ] Cloud Anchors via ARCore Extensions for AR Foundation (cross-platform spatial alignment)
+- [ ] Real-time state sync via Photon Fusion or Unity Netcode for GameObjects
+- [ ] Shared ghost state: who's damaging which ghost, damage attribution
+- [ ] Player avatars / indicators visible in AR
+- [ ] Score/leaderboard per session
+- [ ] Lobby/matchmaking/discovery (nearby players)
+- [ ] Niantic Lightship VPS as alternative for location-based colocalization
+
+### Phase 4 — Distribution
+- [ ] App Store submission (TestFlight first)
+- [ ] App icon and launch screen
+- [ ] Privacy manifest (camera usage, AR data)
+
+## Roadmap: Android
+
+### Phase 1 — Polish (current)
+- [x] AR plane detection and ghost placement
+- [x] Beam firing with hit detection
+- [x] Health system and capture animation
+- [x] OpenGLES3 (not Vulkan) for ARCore compatibility
+- [x] CLI build and ADB deployment
+- [x] Faster plane detection (0.1m threshold)
+- [x] No tap-to-place (auto-placement only)
+- [ ] Replace placeholder ghost model (same asset as iOS)
+- [ ] Add transparent Material assets (same as iOS)
+- [ ] Add sound effects
+- [ ] Add particle effects
+- [ ] Haptic feedback on beam hit (Android vibration API)
+
+### Phase 2 — Game feel
+- [ ] Same as iOS (shared codebase — all changes apply to both platforms)
+
+### Phase 3 — Multiplayer
+- [ ] Same as iOS (AR Foundation + Cloud Anchors work cross-platform)
+- [ ] Cross-platform play: iOS and Android players in the same session
+
+### Phase 4 — Distribution
+- [ ] Google Play submission (internal testing track first)
+- [ ] App icon and feature graphic
+- [ ] Play Store listing (screenshots, description)
+- [ ] Target SDK compliance (currently API 29 min, needs to meet Play Store requirements)
