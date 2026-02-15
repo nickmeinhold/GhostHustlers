@@ -46,12 +46,19 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("[GameManager] Start() - ghostPrefab=" + (ghostPrefab != null ? ghostPrefab.name : "NULL") +
+            " planeController=" + (planeController != null) +
+            " arCamera=" + (arCamera != null) +
+            " uiManager=" + (uiManager != null));
+
         // Create beam (starts inactive)
         beam = ProtonBeam.Create();
 
         // Subscribe to plane detection
         if (planeController != null)
             planeController.OnSuitablePlaneFound += OnSuitablePlaneFound;
+        else
+            Debug.LogError("[GameManager] planeController is NULL! Ghost placement won't work.");
 
         SetState(GameState.Scanning);
     }
@@ -109,6 +116,7 @@ public class GameManager : MonoBehaviour
 
     void OnSuitablePlaneFound(Pose pose)
     {
+        Debug.Log("[GameManager] OnSuitablePlaneFound at " + pose.position);
         if (CurrentState != GameState.Scanning) return;
         PlaceGhost(pose.position, pose.rotation);
     }
@@ -119,11 +127,12 @@ public class GameManager : MonoBehaviour
     {
         if (ghostPrefab == null)
         {
-            // Fallback: create a procedural ghost (sphere) if no prefab assigned
+            Debug.LogWarning("[GameManager] ghostPrefab is null, creating procedural ghost");
             ghostObject = CreateProceduralGhost();
         }
         else
         {
+            Debug.Log("[GameManager] Instantiating ghost prefab at " + position);
             ghostObject = Instantiate(ghostPrefab, position, Quaternion.identity);
         }
 
@@ -133,6 +142,8 @@ public class GameManager : MonoBehaviour
         currentGhost = ghostObject.GetComponent<Ghost>();
         if (currentGhost == null)
             currentGhost = ghostObject.AddComponent<Ghost>();
+
+        Debug.Log("[GameManager] Ghost placed at " + position);
 
         SetState(GameState.GhostPlaced);
         planeController?.HidePlaneVisuals();

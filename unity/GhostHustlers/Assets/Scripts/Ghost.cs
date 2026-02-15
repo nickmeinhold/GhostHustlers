@@ -23,7 +23,7 @@ public class Ghost : MonoBehaviour
     public float shakeIntensity = 0.01f; // ±1cm jitter
 
     [Header("Ghost Material")]
-    public Color ghostColor = new Color(0.75f, 0.88f, 1f, 0.6f);
+    public Color ghostColor = new Color(0.3f, 0.7f, 1f, 1f);
 
     [Header("Health Bar")]
     public float healthBarWidth = 0.15f;
@@ -65,23 +65,53 @@ public class Ghost : MonoBehaviour
     void SetupMaterial()
     {
         ghostRenderer = GetComponentInChildren<Renderer>();
-        if (ghostRenderer != null)
+        if (ghostRenderer == null)
         {
-            // Create a URP/Lit transparent material
-            ghostMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            ghostMaterial.SetFloat("_Surface", 1); // Transparent
-            ghostMaterial.SetFloat("_Blend", 0); // Alpha
-            ghostMaterial.SetFloat("_AlphaClip", 0);
-            ghostMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            ghostMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            ghostMaterial.SetFloat("_ZWrite", 0);
-            ghostMaterial.SetFloat("_Metallic", 0f);
-            ghostMaterial.SetFloat("_Smoothness", 0.2f);
-            ghostMaterial.SetColor("_BaseColor", ghostColor);
-            ghostMaterial.renderQueue = 3000;
-            ghostMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            ghostRenderer.material = ghostMaterial;
+            Debug.LogError("[Ghost] No Renderer found on ghost or children!");
+            return;
         }
+
+        Shader shader = FindURPShader();
+        ghostMaterial = new Material(shader);
+
+        // Opaque base color — visible against any background
+        ghostMaterial.SetColor("_BaseColor", new Color(0.3f, 0.7f, 1f, 1f));
+        ghostMaterial.SetFloat("_Metallic", 0f);
+        ghostMaterial.SetFloat("_Smoothness", 0.5f);
+        // Leave as opaque (Surface=0) — transparent variants get stripped on device
+        ghostMaterial.SetFloat("_Surface", 0);
+        ghostMaterial.renderQueue = -1; // use shader default
+
+        ghostRenderer.material = ghostMaterial;
+        Debug.Log("[Ghost] Material setup complete, shader: " + shader.name +
+            " color: " + ghostMaterial.GetColor("_BaseColor") +
+            " renderQueue: " + ghostMaterial.renderQueue);
+    }
+
+    static Shader FindURPShader()
+    {
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+        if (shader != null) return shader;
+        Debug.LogWarning("[Ghost] URP/Lit shader not found, trying fallbacks");
+        shader = Shader.Find("Universal Render Pipeline/Simple Lit");
+        if (shader != null) return shader;
+        shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader != null) return shader;
+        Debug.LogError("[Ghost] No URP shader found! Falling back to built-in");
+        return Shader.Find("Sprites/Default");
+    }
+
+    static void ConfigureTransparentMaterial(Material mat, Color color, int renderQueue)
+    {
+        mat.SetFloat("_Surface", 1); // Transparent
+        mat.SetFloat("_Blend", 0); // Alpha
+        mat.SetFloat("_AlphaClip", 0);
+        mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        mat.SetFloat("_ZWrite", 0);
+        mat.SetColor("_BaseColor", color);
+        mat.renderQueue = renderQueue;
+        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
     }
 
     void SetupHealthBar()
@@ -94,14 +124,9 @@ public class Ghost : MonoBehaviour
         healthBarBg.transform.localScale = new Vector3(healthBarWidth, healthBarHeight, healthBarDepth);
         Destroy(healthBarBg.GetComponent<Collider>());
 
-        var bgMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        bgMat.SetFloat("_Surface", 1);
-        bgMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        bgMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        bgMat.SetFloat("_ZWrite", 0);
-        bgMat.SetColor("_BaseColor", new Color(0.2f, 0.2f, 0.2f, 0.8f));
-        bgMat.renderQueue = 3001;
-        bgMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        Shader shader = FindURPShader();
+        var bgMat = new Material(shader);
+        ConfigureTransparentMaterial(bgMat, new Color(0.2f, 0.2f, 0.2f, 0.8f), 3001);
         healthBarBg.GetComponent<Renderer>().material = bgMat;
 
         // Fill bar (green → red)
@@ -112,14 +137,8 @@ public class Ghost : MonoBehaviour
         healthBarFill.transform.localScale = new Vector3(healthBarWidth, healthBarHeight * 1.2f, healthBarDepth * 1.1f);
         Destroy(healthBarFill.GetComponent<Collider>());
 
-        var fillMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        fillMat.SetFloat("_Surface", 1);
-        fillMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        fillMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        fillMat.SetFloat("_ZWrite", 0);
-        fillMat.SetColor("_BaseColor", Color.green);
-        fillMat.renderQueue = 3002;
-        fillMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        var fillMat = new Material(shader);
+        ConfigureTransparentMaterial(fillMat, Color.green, 3002);
         healthBarFillRenderer = healthBarFill.GetComponent<Renderer>();
         healthBarFillRenderer.material = fillMat;
 
